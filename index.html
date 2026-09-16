@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#171c32"><title>Ledger — Smart accounting</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="import.css"></head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="#dashboard"><span class="brand-icon">▥</span> ledger<span class="brand-dot">.</span></a>
+  <button class="workspace" id="workspace"><span class="workspace-avatar">S</span><span>Studio workspace<small>Personal account</small></span><span class="chevrons">⌄</span></button>
+  <div class="nav-label">WORKSPACE</div>
+  <nav aria-label="Main navigation"><button data-page="dashboard" class="active"><span data-icon="dashboard"></span>Overview</button><button data-page="transactions"><span data-icon="transactions"></span>Transactions</button><button data-page="invoices"><span data-icon="invoice"></span>Invoices<span class="nav-count" id="invoice-count">3</span></button><button data-page="budgets"><span data-icon="budget"></span>Budgets</button><button data-page="reports"><span data-icon="chart"></span>Reports</button></nav>
+  <div class="sidebar-bottom"><div class="tip-card"><span class="tip-spark">✧</span><strong>A little clarity goes a long way.</strong><p>Your numbers, all in one place. Make room for what’s next.</p><span>You've got this. <span>↗</span></span></div><button class="settings" data-page="settings"><span data-icon="settings"></span>Settings</button><div class="profile"><div class="avatar">JD</div><span>Jamie Davis<small>Workspace owner</small></span><span class="online-dot"></span></div></div>
+</aside>
+<main><header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong id="breadcrumb">Overview</strong></div><div class="top-actions"><span class="saved"><i></i> All changes saved</span><button class="icon-button" id="notifications" aria-label="View notifications"><span data-icon="bell"></span><i class="notification-dot"></i></button><div class="avatar small">JD</div></div></header><div class="content"><div id="page"></div><footer><span><span class="footer-logo">▥</span> A clearer picture. A smarter business.</span><span>Stored on this device <i></i> <span id="today"></span></span></footer></div></main>
+<dialog id="entry-dialog"><form id="entry-form"><div class="modal-heading"><div><div class="eyebrow">KEEP YOUR BOOKS UP TO DATE</div><h2 id="dialog-title">New transaction</h2></div><button type="button" class="icon-button" id="close-dialog" aria-label="Close">✕</button></div><div id="form-fields"></div><div class="modal-actions"><button type="button" class="button" id="cancel-dialog">Cancel</button><button class="button primary" type="submit">Save entry <span>↗</span></button></div></form></dialog><div id="toast" role="status"></div>
+<dialog id="import-dialog" aria-labelledby="import-title"><div class="modal-heading"><div><div class="eyebrow">TRANSACTION IMPORT</div><h2 id="import-title">Import a CSV file</h2></div><button type="button" class="icon-button" id="close-import" aria-label="Close CSV import">✕</button></div><div id="import-content"></div></dialog>
+<script src="csv.js"></script><script src="app.js"></script><script src="import-ui.js"></script>
+</body></html>

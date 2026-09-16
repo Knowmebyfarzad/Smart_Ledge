@@ -1,0 +1,18 @@
+Use this template. Persian column names are supported. Save the file as CSV UTF-8 so Persian text stays readable.
+
+مبلغ,گیرنده,تاریخ,ساعت,بابت,کد پیگیری,بانک مبدا,نوع,واحد پول
+125000,علی رضایی,1405/06/25,14:35:20,پرداخت فاکتور,000123456789,بانک ملت,برداشت,ریال
+2500000,شرکت نمونه,1405/06/25,16:10:00,دریافت وجه خدمات,000123456790,بانک سامان,واریز,ریال
+
+Tell GPT to follow these rules:
+
+- مبلغ: numbers only, without thousands separators. Use one unit throughout: ریال or تومان.
+- تاریخ: Jalali date in YYYY/MM/DD format.
+- ساعت: 24-hour time, HH:mm:ss.
+- کد پیگیری: preserve the original code and leading zeros.
+- نوع: برداشت for expenses; واریز for income.
+- Don’t invent missing details. Leave missing times or tracking codes blank.
+
+When importing, select UTF-8, Comma, Jalali, Year/month/day, and IRR for ریال or IRT for تومان.
+
+If your workspace still contains USD sample data, back it up and clear it in Settings before importing rials or tomans.

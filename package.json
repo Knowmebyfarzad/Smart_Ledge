@@ -1,0 +1,1 @@
+{"name":"ledger-smart-accounting","version":"1.0.0","private":true,"description":"A local-first accounting dashboard","scripts":{"start":"node server.js","dev":"node server.js","check":"node --check app.js && node --check csv.js && node --check import-ui.js && node --check server.js","test":"node verify.cjs && node verify-csv.cjs"}}
