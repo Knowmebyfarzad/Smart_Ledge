@@ -166,7 +166,8 @@ function createAuth({ port }) {
         }
         const match = pathname.match(/^\/api\/users\/([a-f0-9-]+)(?:\/(reset-password))?$/);
         if (match && req.method === 'POST') {
-          const data = await body(req), target = q('SELECT * FROM users WHERE id=?').get(match[1]);
+          const data = await body(req); requireUser(req);
+          const target = q('SELECT * FROM users WHERE id=?').get(match[1]);
           if (!target) fail(404, 'User not found.');
           if (target.id === user.id) fail(400, 'Use Change password for your own account. You cannot disable yourself.');
           if (match[2]) {

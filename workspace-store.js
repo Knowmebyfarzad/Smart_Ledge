@@ -8,7 +8,7 @@ function string(value, label, max = 1000, optional = false) {
   return value;
 }
 function amount(value, label, zero = false) {
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < (zero ? 0 : 0.01) || value > 999999999999.99 || Math.abs(value * 100 - Math.round(value * 100)) > 0.02) invalid(`Invalid ${label}.`);
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < (zero ? 0 : 0.01) || value > 999999999999.99 || Math.abs(value - Math.round(value * 100) / 100) > Number.EPSILON * Math.max(1, Math.abs(value))) invalid(`Invalid ${label}.`);
   return Math.round(value * 100) / 100;
 }
 function date(value) {

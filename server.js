@@ -5,7 +5,7 @@ const path = require('node:path');
 const { createAuth } = require('./auth-server.js');
 const port = Number(process.env.PORT) || 3000;
 const auth = createAuth({ port });
-const assets = ['index.html', 'styles.css', 'import.css', 'auth.css', 'app.js', 'csv.js', 'import-ui.js', 'auth.js'];
+const assets = ['index.html', 'styles.css', 'import.css', 'auth.css', 'app.js', 'csv.js', 'import-ui.js', 'auth.js', 'workspace-client.js'];
 const files = Object.fromEntries(assets.map(file => ['/' + file, file])); files['/'] = 'index.html';
 const mime = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8' };
 const server = http.createServer(async (req, res) => {

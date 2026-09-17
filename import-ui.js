@@ -7,9 +7,10 @@ function importSelect(id, label, values, selected) {
   return `<label class="field">${label}<select id="${id}">${values.map(([value, text]) => `<option value="${value}" ${String(value) === String(selected) ? 'selected' : ''}>${esc(text)}</option>`).join('')}</select></label>`;
 }
 function openImport() {
+  if (!account || saving) return;
   importReadVersion++;
   importSession = null;
-  importContent.innerHTML = `<div class="import-intro"><span class="import-symbol">↥</span><h3>Bring your transactions into Ledger</h3><p>Choose a CSV, match its columns, then review every detail before saving. Your file stays on this device.</p></div>
+  importContent.innerHTML = `<div class="import-intro"><span class="import-symbol">↥</span><h3>Bring your transactions into Ledger</h3><p>Choose a CSV, match its columns, then review every detail. Confirmed imports are saved to your private account on the server.</p></div>
     <div class="import-upload"><label class="field">Transaction file (.csv or .tsv, up to 5 MB)<input id="csv-file" type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values"></label>
     ${importSelect('csv-encoding', 'File encoding', [['utf-8', 'UTF-8 (recommended)'], ['windows-1256', 'Arabic / Persian (Windows-1256)'], ['utf-16le', 'UTF-16 little endian'], ['utf-16be', 'UTF-16 big endian']], 'utf-8')}</div>
     <p class="import-help">Include price, recipient, date, time, description/reason, tracking or backup code, and originating bank. Missing time or code will be flagged for review.</p>
@@ -81,23 +82,20 @@ function reviewImport() {
     <div class="import-confirm"><button class="button" id="csv-validation-report">Download validation report</button><button class="button primary" id="csv-confirm" ${canImport ? '' : 'disabled'}>Import ${result.ready.length} transactions</button></div>
     <p class="import-help">Exact matches are skipped. Reused bank tracking codes with different details are blocked. Missing times and codes remain blank. Original source fields are included in JSON backups.</p>`;
 }
-function confirmImport() {
-  if (!importSession?.result) return;
-  // Revalidate against the current books immediately before committing.
+async function confirmImport() {
+  if (!importSession?.result || saving) return;
   reviewImport();
   const { result, options } = importSession;
   if (result.errors.length || result.invalid || !result.ready.length) return;
   const batchId = crypto.randomUUID();
   const candidate = { ...state, currency: options.currency, transactions: [...state.transactions, ...result.ready.map(t => ({ ...t, id: crypto.randomUUID(), importBatch: batchId }))] };
   try {
-    // Persist first: a quota/storage failure must not leave a partial import.
-    localStorage.setItem('ledger-v1', JSON.stringify(candidate));
-  } catch {
-    importMessage('Import was not saved. Browser storage is full or unavailable. No transactions were added. Export a backup or use a smaller file.');
+    await commitState(candidate);
+  } catch (error) {
+    if (importSession) importMessage(`Import could not be confirmed: ${error.message}`);
     return;
   }
   const count = result.ready.length;
-  state = candidate;
   importSession = null;
   importDialog.close();
   query = ''; typeFilter = 'all';
@@ -111,7 +109,7 @@ function downloadValidationReport() {
   download('\uFEFF' + rows.map(r => r.map(csvCell).join(',')).join('\r\n'), 'ledger-import-validation.csv', 'text/csv;charset=utf-8');
 }
 document.addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b) return;
+  const b = e.target.closest('button'); if (!b || !account || saving) return;
   if (b.dataset.action === 'import') openImport();
   if (b.id === 'close-import') { importReadVersion++; importDialog.close(); importSession = null; }
   if (b.id === 'csv-review') reviewImport();
@@ -132,4 +130,4 @@ importDialog.addEventListener('change', e => {
 importDialog.addEventListener('input', e => {
   if (e.target.id === 'csv-bank' && importSession) { importSession.result = null; document.getElementById('csv-preview').innerHTML = ''; }
 });
-importDialog.addEventListener('cancel', () => { importReadVersion++; importSession = null; });
+importDialog.addEventListener('cancel', event => { if (saving) { event.preventDefault(); return; } importReadVersion++; importSession = null; });
