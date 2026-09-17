@@ -125,6 +125,15 @@ function createAuth({ port }) {
         q('DELETE FROM attempts WHERE key=?').run(attemptKey);
         const s = createSession(latest, req); return json(res, 200, s.payload, { 'Set-Cookie': cookie(s.token) });
       }
+      if (pathname === '/api/signup' && req.method === 'POST') {
+        if (!hasUsers()) fail(409, 'The site administrator must complete initial setup before registration opens.');
+        throttle('signup:' + req.socket.remoteAddress, 20);
+        const data = await body(req), identity = validateIdentity(data);
+        throttle('signup-email:' + hash(identity.email), 5);
+        const password = await passwordHash(data.password);
+        const user = atomic(() => addUser({ ...identity, password, role: 'member', mustChange: false }));
+        const s = createSession(user, req); return json(res, 201, s.payload, { 'Set-Cookie': cookie(s.token) });
+      }
       const user = requireUser(req, pathname === '/api/logout' || pathname === '/api/password');
       if (pathname === '/api/logout' && req.method === 'POST') {
         q('DELETE FROM sessions WHERE token_hash=?').run(user.token_hash); return json(res, 200, { ok: true }, { 'Set-Cookie': cookie('', 0) });

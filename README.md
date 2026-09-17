@@ -3,6 +3,11 @@
 A responsive accounting workspace with a dashboard, cash-flow chart, spending breakdown, searchable transactions, invoices, monthly budgets, reports, CSV import/export, and JSON backups.
 
 Requires Node.js 24 or later. Run `npm start`, then open `http://localhost:3000`. No packages or build step are required. On Windows PowerShell, use `npm.cmd start` if PowerShell blocks `npm.ps1`.
+## Preview
+![home](Preview/Dashboard.png)
+![login](Preview/Login.png)
+
+
 
 ## First administrator and users
 

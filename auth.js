@@ -11,15 +11,16 @@ window.LedgerAuth = (() => {
     mode = next;
     document.getElementById('app-shell').hidden = true;
     gate.hidden = false;
-    const setup = next === 'setup', change = next === 'password';
-    document.getElementById('auth-title').textContent = setup ? 'Create your administrator' : change ? 'Make this account yours' : 'Welcome back.';
-    document.getElementById('auth-subtitle').textContent = setup ? 'Set up the owner account. Only someone with the server’s setup code can complete this step.' : change ? 'Replace your temporary password before opening your private workspace.' : 'Sign in to your private accounting workspace.';
+    const setup = next === 'setup', change = next === 'password', signup = next === 'signup';
+    document.getElementById('auth-title').textContent = setup ? 'Create your administrator' : change ? 'Make this account yours' : signup ? 'Create your account.' : 'Welcome back.';
+    document.getElementById('auth-subtitle').textContent = setup ? 'Set up the owner account. Only someone with the server’s setup code can complete this step.' : change ? 'Replace your temporary password before opening your private workspace.' : signup ? 'Start a private accounting workspace of your own.' : 'Sign in to your private accounting workspace.';
     document.getElementById('auth-fields').innerHTML = (setup ? input('One-time setup code', 'setupCode', 'password', 'off') + '<p class="auth-hint">On the server, open <code>.data/setup-code.txt</code>. The code works only for initial setup.</p>' + input('Your name', 'name', 'text', 'name', 'maxlength="100"') : '') +
+      (signup ? input('Your name', 'name', 'text', 'name', 'maxlength="100"') : '') +
       (change ? input('Current / temporary password', 'currentPassword', 'password', 'current-password', 'maxlength="128"') : input('Email address', 'email', 'email', 'username', 'maxlength="254"')) +
-      input(change ? 'New password' : 'Password', 'password', 'password', setup || change ? 'new-password' : 'current-password', `${setup || change ? 'minlength="12"' : ''} maxlength="128"`) +
-      (setup || change ? input('Confirm password', 'confirmPassword', 'password', 'new-password', 'minlength="12" maxlength="128"') + '<p class="auth-hint">Use 12–128 characters. A long, unique passphrase works well.</p>' : '');
-    document.getElementById('auth-submit').textContent = setup ? 'Create administrator →' : change ? 'Save password →' : 'Sign in →';
-    document.getElementById('auth-help').textContent = setup ? 'New users can be added in Settings after setup.' : change ? 'Your other sessions will be signed out.' : 'Need an account or password reset? Contact your administrator.';
+      input(change ? 'New password' : 'Password', 'password', 'password', setup || change || signup ? 'new-password' : 'current-password', `${setup || change || signup ? 'minlength="12"' : ''} maxlength="128"`) +
+      (setup || change || signup ? input('Confirm password', 'confirmPassword', 'password', 'new-password', 'minlength="12" maxlength="128"') + '<p class="auth-hint">Use 12–128 characters. A long, unique passphrase works well.</p>' : '');
+    document.getElementById('auth-submit').textContent = setup ? 'Create administrator →' : change ? 'Save password →' : signup ? 'Create account →' : 'Sign in →';
+    document.getElementById('auth-help').innerHTML = setup ? 'After setup, anyone can create a private member account.' : change ? 'Your other sessions will be signed out.' : signup ? 'Already have an account? <button type="button" class="text-link auth-mode-link" data-auth-mode="login">Sign in</button>' : 'New here? <button type="button" class="text-link auth-mode-link" data-auth-mode="signup">Create an account</button><br>Need a password reset? Contact an administrator.';
     document.getElementById('auth-signout').hidden = !change;
     errorBox.textContent = message;
   }
@@ -78,7 +79,7 @@ window.LedgerAuth = (() => {
     if (mode !== 'login' && data.password !== data.confirmPassword) { errorBox.textContent = 'Passwords do not match.'; return; }
     busy = true; document.getElementById('auth-submit').disabled = true; errorBox.textContent = '';
     try {
-      const response = await request(mode === 'setup' ? '/api/setup' : mode === 'password' ? '/api/password' : '/api/login', { method: 'POST', body: JSON.stringify(data) });
+      const response = await request(mode === 'setup' ? '/api/setup' : mode === 'password' ? '/api/password' : mode === 'signup' ? '/api/signup' : '/api/login', { method: 'POST', body: JSON.stringify(data) });
       await accept(response, true);
     } catch (error) { errorBox.textContent = error.message; }
     finally { busy = false; document.getElementById('auth-submit').disabled = false; }
@@ -86,6 +87,10 @@ window.LedgerAuth = (() => {
   document.getElementById('auth-signout').addEventListener('click', logout);
   document.getElementById('signout').addEventListener('click', logout);
   document.getElementById('auth-retry').addEventListener('click', bootstrap);
+  gate.addEventListener('click', event => {
+    const switcher = event.target.closest('[data-auth-mode]');
+    if (switcher && !busy) { form.reset(); showGate(switcher.dataset.authMode); }
+  });
   channel?.addEventListener('message', () => { if (current) lock('The account session changed in another tab. Sign in to continue.'); });
   async function checkSession() {
     if (!current || document.hidden || busy) return;
